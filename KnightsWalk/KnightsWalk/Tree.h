@@ -36,6 +36,13 @@
 
 #include <vector>
 
+
+
+/*
+	The Node class. This is a simple class that holds only a single datum.
+	This class will be the foundation for a vertice class that will be defined later.
+*/
+
 template<class T>
 class Node
 {
@@ -50,13 +57,25 @@ Node<T>::Node(T data) :
 	m_Data(data)
 {}
 
+
+
+
+/*
+	The Path class. This object will link two nodes together.
+	Through inheiritance, the nodes stored in the path will know how many paths they are connected to.
+	These form the links in a graph.
+*/
+
 template<class T>
 class Path
 {
 public:
-	Path(const Node<T>& origin, const Node<T>& end);
-	~Path();
-	Path(const Path& c);
+	Path(const Node<T>& origin, const Node<T>& end);	//ctor
+	~Path();											//dtor
+	Path(const Path& c);								//copy ctor
+	Path(Path&& m);										//move ctor
+	Path& operator=(const Path& c);						//copy ass op
+	Path& operator=(Path&& m);							//move ass op
 private:
 	int m_Value;
 	bool m_Active;
@@ -64,7 +83,7 @@ private:
 };
 
 template<class T>
-Path<T>::Path(const Node<T>& origin, const Node<T>& end)
+Path<T>::Path(const Node<T>& origin, const Node<T>& end)	//ctor
 {
 	m_LinkedNodes.resize(2);
 	Node<T>* newOrigin = new Node<T>(origin);
@@ -74,14 +93,14 @@ Path<T>::Path(const Node<T>& origin, const Node<T>& end)
 }
 
 template<class T>
-Path<T>::~Path()
+Path<T>::~Path()											//dtor
 {
 	delete m_LinkedNodes[0];
 	delete m_LinkedNodes[1];
 }
 
 template<class T>
-Path<T>::Path(const Path& c) :
+Path<T>::Path(const Path& c) :								//copy ctor
 	m_Value(c.m_Value),
 	m_Active(c.m_Active)
 {
@@ -94,29 +113,82 @@ Path<T>::Path(const Path& c) :
 }
 
 template<class T>
+Path<T>::Path(Path&& m) :									//move ctor
+	m_Value(m.m_Value),
+	m_Active(m.m_active),
+	m_LinkedNodes(m.m_LinkedNodes)
+{
+	m.m_Value = 0;
+	m.m_Active = false;
+	m.m_LinkedNodes[0] = nullptr;
+	m.m_LinkedNodes[1] = nullptr;
+}
+
+template<class T>
+Path<T>& Path<T>::operator=(const Path& c)					//copy ass op
+{
+	Path temp(c);
+	this* = std::move(temp);
+	return this*;
+}
+
+template<class T>
+Path<T>& Path<T>::operator=(Path&& m)						//move ass op
+{
+	if (this != &m)
+	{
+		delete m_LinkedNodes[0];
+		delete m_LinkedNodes[1];
+		m_LinkedNodes[0] = m.m_LinkedNodes[0];
+		m_LinkedNodes[1] = m.m_LinkedNodes[1];
+		m.m_LinkedNodes[0] = nullptr;
+		m.m_LinkedNodes[1] = nullptr;
+		m_Value = m.m_Value;
+		m_Active = m.m_Active;
+	}
+	return this*
+}
+
+
+
+
+/*
+The Vertice class. This objects inheirits from Node and can thus be linked using Path.
+A vertice is more useful than a node because it knows what paths are connected to it.
+*/
+
+template<class T>
 class Vertice : public Node
 {
 public:
-	Vertice(T data);
-	~Vertice();
-	Vertice(const Vertice& c);
+	Vertice(T data);						//ctor
+	~Vertice();								//dtor
+	Vertice(const Vertice& c);				//copy ctor
+	Vertice(Vertice&& m);					//move ctor
+	Vertice& operator=(const Vertice& c);	//copy ass op
+	Vertice& operator=(Vertice&& m);		//move ass op
 private:
 	std::vector<Path*> m_Paths;
 	int m_Value;
 };
 
 template<class T>
-Vertice<T>::Vertice(T data)
-{
-	Node(data);
-}
-
-template<class T>
-Vertice<T>::~Vertice()
+Vertice<T>::Vertice(T data) :							//ctor
+	Node(data),
+	m_Value(0)
 {}
 
 template<class T>
-Vertice<T>::Vertice(const Vertice& c) :
+Vertice<T>::~Vertice()									//dtor
+{
+	for (i = 0; i < m_Value; i++)
+	{
+		delete m_Paths[i];
+	}
+}
+
+template<class T>
+Vertice<T>::Vertice(const Vertice& c) :					//copy ctor
 	Node(c),
 	m_Value(c.m_Value),
 	m_Paths(c.m_Paths.size())
@@ -124,6 +196,46 @@ Vertice<T>::Vertice(const Vertice& c) :
 	for (std::size_t i = 0; i < c.m_Paths.size(); i++)
 	{
 		m_Paths[i] = new Path(*c.m_Paths[i]);
+	}
+}
+
+template<class T>
+Vertice<T>::Vertice(Vertice&& m) :						//move ctor
+	Node(m),
+	m_Value(m.m_Value),
+	m_Paths(m.m_Paths)
+{
+	for (std::size_t i = 0; i < m.m_Paths.size(); i++)
+	{
+		m.m_Paths[i] = nullptr;
+	}
+}
+
+template<class T>
+Vertice<T>& Vertice<T>::operator=(const Vertice& c)		//copy ass op
+{
+	Vertice temp(c);
+	this* = std::move(temp);
+	return this*;
+}
+
+template<class T>
+Vertice<T>& Vertice<T>::operator=(Vertice&& m)			//move ass op
+{
+	if (this != &m)
+	{
+		Node(m)
+		for (int i = 0; i < m_Paths.size(); i++)
+		{
+			delete m_Paths[i];
+		}
+		m_Paths.resize(m.m_Paths.size());
+		for (int i = 0; j i < m_Paths.size(); i++)
+		{
+			m_Paths[i] = m.m_Paths[i];
+			m.m_Paths[i] = nullptr;
+		}
+		m_Value = m.m_Value;
 	}
 }
 

@@ -37,12 +37,12 @@ template<class T>
 class BinaryHeap
 {
 public:
-	BinaryHeap(const std::vector<T*>& items);
-	~BinaryHeap();
-	BinaryHeap(const BinaryHeap& c);
-	BinaryHeap(BinaryHeap&& m);
-	BinaryHeap& operator=(const BinaryHeap& c);
-	BinaryHeap& operator=(BinaryHeap&& m);
+	BinaryHeap(const std::vector<T*>& items);		//ctor
+	~BinaryHeap();									//dtor
+	BinaryHeap(const BinaryHeap& c);				//copy ctor
+	BinaryHeap(BinaryHeap&& m);						//move ctor
+	BinaryHeap& operator=(const BinaryHeap& c);		//copy ass op
+	BinaryHeap& operator=(BinaryHeap&& m);			//move ass op
 
 	bool empty();
 	int size();
@@ -56,7 +56,7 @@ private:
 };
 
 template<class T>
-BinaryHeap<T>::BinaryHeap(const std::vector<T*>& items)	// ctor
+BinaryHeap<T>::BinaryHeap(const std::vector<T*>& items)		// ctor
 {
 	for (int i = 0; i < items.size(); i++)
 	{
@@ -65,7 +65,7 @@ BinaryHeap<T>::BinaryHeap(const std::vector<T*>& items)	// ctor
 }
 
 template<class T>
-BinaryHeap<T>::~BinaryHeap() // dtor
+BinaryHeap<T>::~BinaryHeap()								// dtor
 {
 	for (int i = 0; i < m_Heap.size(); i++)
 	{
@@ -74,7 +74,7 @@ BinaryHeap<T>::~BinaryHeap() // dtor
 }
 
 template<class T>
-BinaryHeap<T>::BinaryHeap(const BinaryHeap& c) : // copy ctor
+BinaryHeap<T>::BinaryHeap(const BinaryHeap& c) :			// copy ctor
 	m_Heap(c.m_Heap.size())	
 {
 	for (std::size_t i = 0; i < c.m_Heap.size(); i++)
@@ -84,7 +84,7 @@ BinaryHeap<T>::BinaryHeap(const BinaryHeap& c) : // copy ctor
 }
 
 template<class T>
-BinaryHeap<T>::BinaryHeap(BinaryHeap&& m) : // move ctor
+BinaryHeap<T>::BinaryHeap(BinaryHeap&& m) :					// move ctor
 	m_Heap(m.m_Heap)
 {
 	for (int i = 0; i < m.m_Heap.size(); i++)
@@ -102,19 +102,22 @@ BinaryHeap<T>& BinaryHeap<T>::operator=(const BinaryHeap& c) // copy ass op
 }
 
 template<class T>
-BinaryHeap<T>& BinaryHeap<T>::operator=(BinaryHeap&& m) // move ass op
+BinaryHeap<T>& BinaryHeap<T>::operator=(BinaryHeap&& m)		// move ass op
 {
-	for (int i = 0; i < m_Heap.size(); i++)
+	if (this != &m)
 	{
-		delete m_Heap[i];
-		m_Heap[i] = m.m_Heap[i];
-		m.m_Heap[i] = nullptr;
+		for (int i = 0; i < m_Heap.size(); i++)
+		{
+			delete m_Heap[i];
+			m_Heap[i] = m.m_Heap[i];
+			m.m_Heap[i] = nullptr;
+		}
 	}
 	return this*;
 }
 
 template<class T>
-bool BinaryHeap<T>::empty()			// returns true if the heap is emptry, false otherwise.
+bool BinaryHeap<T>::empty()			// returns true if the heap is empty, false otherwise.
 {
 	return (m_Heap.empty());
 }
