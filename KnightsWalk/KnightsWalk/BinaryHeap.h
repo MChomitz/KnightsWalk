@@ -4,8 +4,9 @@
 
 		This defines a template class, BinaryHeap, which ensures the first item in the heap is the largest:
 
+		Class BinaryHeap
 			public
-			 constructor, destructor and copy
+			 constructor, destructor, copy
 			 empty		returns true if the heap is empty. false otherwise.
 			 size		returns the number of items on the heap
 			 peek		returns the value of the top of the heap.
@@ -36,9 +37,12 @@ template<class T>
 class BinaryHeap
 {
 public:
-	BinaryHeap(std::vector<T*>);
+	BinaryHeap(const std::vector<T*>& items);
 	~BinaryHeap();
 	BinaryHeap(const BinaryHeap& c);
+	BinaryHeap(BinaryHeap&& m);
+	BinaryHeap& operator=(const BinaryHeap& c);
+	BinaryHeap& operator=(BinaryHeap&& m);
 
 	bool empty();
 	int size();
@@ -52,7 +56,7 @@ private:
 };
 
 template<class T>
-BinaryHeap<T>::BinaryHeap(std::vector<T*> items)	// constructor. push each item in the input vector.
+BinaryHeap<T>::BinaryHeap(const std::vector<T*>& items)	// ctor
 {
 	for (int i = 0; i < items.size(); i++)
 	{
@@ -61,7 +65,7 @@ BinaryHeap<T>::BinaryHeap(std::vector<T*> items)	// constructor. push each item 
 }
 
 template<class T>
-BinaryHeap<T>::~BinaryHeap()	// deconstructor. delete the data on the heap.
+BinaryHeap<T>::~BinaryHeap() // dtor
 {
 	for (int i = 0; i < m_Heap.size(); i++)
 	{
@@ -70,36 +74,68 @@ BinaryHeap<T>::~BinaryHeap()	// deconstructor. delete the data on the heap.
 }
 
 template<class T>
-BinaryHeap<T>::BinaryHeap(const BinaryHeap& c)	// copier. make new heap data and new pointers!
+BinaryHeap<T>::BinaryHeap(const BinaryHeap& c) : // copy ctor
+	m_Heap(c.m_Heap.size())	
 {
-	for (int i = 0; i < c.m_Heap.size(); i++)
+	for (std::size_t i = 0; i < c.m_Heap.size(); i++)
 	{
-		m_Heap.push_back(c.m_Heap[i]);
+		m_Heap[i] = new T(*c.m_Heap[i])
 	}
 }
 
 template<class T>
-bool BinaryHeap<T>::empty()		// returns true if the heap is emptry, false otherwise.
+BinaryHeap<T>::BinaryHeap(BinaryHeap&& m) : // move ctor
+	m_Heap(m.m_Heap)
+{
+	for (int i = 0; i < m.m_Heap.size(); i++)
+	{
+		m.m_Heap[i] = nullptr;
+	}
+}
+
+template<class T>
+BinaryHeap<T>& BinaryHeap<T>::operator=(const BinaryHeap& c) // copy ass op
+{
+	BinaryHeap temp(c);
+	this* = std::move(temp);
+	return this*;
+}
+
+template<class T>
+BinaryHeap<T>& BinaryHeap<T>::operator=(BinaryHeap&& m) // move ass op
+{
+	for (int i = 0; i < m_Heap.size(); i++)
+	{
+		delete m_Heap[i];
+		m_Heap[i] = m.m_Heap[i];
+		m.m_Heap[i] = nullptr;
+	}
+	return this*;
+}
+
+template<class T>
+bool BinaryHeap<T>::empty()			// returns true if the heap is emptry, false otherwise.
 {
 	return (m_Heap.empty());
 }
 
 template<class T>
-int BinaryHeap<T>::size()
+int BinaryHeap<T>::size()			// returns the number of items on the heap
 {
 	return m_Heap.size();
 }
 
 template<class T>
-const T* BinaryHeap<T>::peek()
+const T* BinaryHeap<T>::peek()		// returns the first item on the heap, but does not remove it
 {
 	return m_Heap[0];
 }
 
 template<class T>
-void BinaryHeap<T>::push(T* item) // push new items onto the binary heap.
+void BinaryHeap<T>::push(T* item)	// push new items onto the binary heap.
 {
-	m_Heap.push_back(item);
+	T* newItem = new T(*item);
+	m_Heap.push_back(newItem);
 	int index = m_Heap.size() - 1;
 	while (!propogateUp(index))
 	{
@@ -107,7 +143,7 @@ void BinaryHeap<T>::push(T* item) // push new items onto the binary heap.
 }
 
 template<class T>
-T* BinaryHeap<T>::pull()	// pull the highest value from the heap.
+T* BinaryHeap<T>::pull()			// pull the highest value from the heap, removing it.
 {
 	if (m_Heap.empty())
 	{
