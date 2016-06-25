@@ -47,14 +47,14 @@ template<class T>
 class Node
 {
 public:
-	Node(T data);
+	Node(T datum);
 private:
-	T m_Data;
+	T m_Datum;
 };
 
 template<class T>
-Node<T>::Node(T data) :
-	m_Data(data)
+Node<T>::Node(T datum) :
+	m_Datum(datum)
 {}
 
 
@@ -161,7 +161,7 @@ template<class T>
 class Vertice : public Node
 {
 public:
-	Vertice(T data);						//ctor
+	Vertice(T datum);						//ctor
 	~Vertice();								//dtor
 	Vertice(const Vertice& c);				//copy ctor
 	Vertice(Vertice&& m);					//move ctor
@@ -173,8 +173,8 @@ private:
 };
 
 template<class T>
-Vertice<T>::Vertice(T data) :							//ctor
-	Node(data),
+Vertice<T>::Vertice(T datum) :							//ctor
+	Node(datum),
 	m_Value(0)
 {}
 
