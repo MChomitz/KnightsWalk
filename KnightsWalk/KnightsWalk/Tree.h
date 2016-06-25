@@ -48,6 +48,13 @@ class Node
 {
 public:
 	Node(T datum);
+
+	T getDatum();
+	void setDatum(const T& datum);
+
+	virtual int getValue() const = 0;
+	virtual valueUp() const = 0;
+	virtual valueDown() const = 0;
 private:
 	T m_Datum;
 };
@@ -56,6 +63,24 @@ template<class T>
 Node<T>::Node(T datum) :
 	m_Datum(datum)
 {}
+
+template<class T>
+T getDatum()
+{
+	return m_Datum;
+}
+
+template<class T>
+void Node<T>::setDatum(const T& datum)
+{
+	m_Datum = datum;
+}
+
+template<class T>
+int getValue()
+{
+	return 0;
+}
 
 
 
@@ -76,6 +101,12 @@ public:
 	Path(Path&& m);										//move ctor
 	Path& operator=(const Path& c);						//copy ass op
 	Path& operator=(Path&& m);							//move ass op
+
+	bool checkActive();
+	void calculateValue();
+	void toggle();
+	void valueUp();
+	void valueDown();
 private:
 	int m_Value;
 	bool m_Active;
@@ -83,7 +114,9 @@ private:
 };
 
 template<class T>
-Path<T>::Path(const Node<T>& origin, const Node<T>& end)	//ctor
+Path<T>::Path(const Node<T>& origin, const Node<T>& end) :	//ctor
+	m_Active(true),
+	m_Value(0)
 {
 	m_LinkedNodes.resize(2);
 	Node<T>* newOrigin = new Node<T>(origin);
@@ -149,6 +182,55 @@ Path<T>& Path<T>::operator=(Path&& m)						//move ass op
 	return this*
 }
 
+template<class T>
+bool Path<T>::checkActive()
+{
+	return m_Active;
+}
+
+template<class T>
+void Path<T>::calculateValue()
+{
+	int originValue = m_LinkedNodes[0].getValue();
+	int endValue = m_LinkedNodes[1].getValue();
+	if ((originValue <= 2) || (endValue <= 2))
+	{
+		m_Value = 0;
+	}
+	else
+	{
+		m_Value = originValue + endValue;
+	}
+}
+
+template<class T>
+void Path<T>::toggle()
+{
+	if (m_Active)
+	{
+		m_Active = false;
+		m_LinkedNodes[0].valueDown();
+		m_LinkedNodes[1].valueDown();
+	}
+	else
+	{
+		m_Active = true;
+		m_LinkedNodes[0].valueUp();
+		m_LinkedNodes[1].valueUp();
+	}
+}
+
+template<class T>
+void Path<T>::valueUp()
+{
+	m_Value++;
+}
+
+template<class T>
+void Path<T>::valueDown()
+{
+	m_Value--;
+}
 
 
 
@@ -167,6 +249,12 @@ public:
 	Vertice(Vertice&& m);					//move ctor
 	Vertice& operator=(const Vertice& c);	//copy ass op
 	Vertice& operator=(Vertice&& m);		//move ass op
+
+	void calculateValue();
+
+	int getValue();
+	void valueUp();
+	void valueDown();
 private:
 	std::vector<Path*> m_Paths;
 	int m_Value;
@@ -236,6 +324,42 @@ Vertice<T>& Vertice<T>::operator=(Vertice&& m)			//move ass op
 			m.m_Paths[i] = nullptr;
 		}
 		m_Value = m.m_Value;
+	}
+}
+
+template<class T>
+void Vertice<T>::calculateValue()
+{
+	m_Value = 0;
+	for (int i = 0; i < m_Paths.size(); i++)
+	{
+		m_Value += m_Paths[i].checkActive();
+	}
+}
+
+template<class T>
+int Vertice<T>::getValue()
+{
+	return m_Value;
+}
+
+template<class T>
+void Vertice<T>::valueDown()
+{
+	m_Value--;
+	for (int i = 0; i < m_Paths.size(); i++)
+	{
+		m_Paths[i].valueDown();
+	}
+}
+
+template<class T>
+void Vertice<T>::valueUp()
+{
+	m_Value++;
+	for (int i = 0; i < m_Paths.size(); i++)
+	{
+		m_Paths[i].valueUp();
 	}
 }
 
